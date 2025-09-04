@@ -1,0 +1,6 @@
+@Microsservico.A_HostAddress = http://localhost:5145
+
+GET {{Microsservico.A_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
