@@ -1,4 +1,4 @@
-﻿namespace Microsservico.A
+﻿namespace Microsservico.B
 {
 	/// <summary>
 	/// Essa classe será uma API das variáveis de ambientes citadas no arquivo 'appSettings.json'

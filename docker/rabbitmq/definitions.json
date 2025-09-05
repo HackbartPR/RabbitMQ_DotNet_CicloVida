@@ -4,6 +4,16 @@
             "name": "admin",
             "password": "admin",
             "tags": "administrator"
+        },
+        {
+            "name": "microsserviceA",
+            "password": "123",
+            "tags": ""
+        },
+        {
+            "name": "microsserviceB",
+            "password": "123",
+            "tags": ""
         }
     ],
     "vhosts": [
@@ -14,6 +24,20 @@
     "permissions": [
         {
             "user": "admin",
+            "vhost": "/",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        },
+        {
+            "user": "microsserviceA",
+            "vhost": "/",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        },
+        {
+            "user": "microsserviceB",
             "vhost": "/",
             "configure": ".*",
             "write": ".*",
@@ -46,7 +70,7 @@
             "vhost": "/",
             "destination": "queue_example",
             "destination_type": "queue",
-            "routing_key": "user_created_rk",
+            "routing_key": "queue_example",
             "arguments": {}
         }
     ]

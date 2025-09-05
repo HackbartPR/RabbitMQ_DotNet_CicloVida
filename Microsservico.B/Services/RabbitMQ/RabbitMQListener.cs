@@ -1,45 +1,54 @@
 ﻿using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System.Text;
 
-namespace Microsservico.A.Services.RabbitMQ
+namespace Microsservico.B.Services.RabbitMQ
 {
 	/// <summary>
-	/// Classe responsável por realizar a publicação das mensagens
+	/// Classe responsável por realizar a leitura das mensagens.
 	/// Essa classe será quem realizará a abertura e fechamento dos channels.
-	/// Novamente, essa classe está separada da classe que abre a conexão devido ao fato de que a conexão deve ser um Singleton, enquanto esta pode ser um Scoped
+	/// Como teremos um BackgroundService utilizando essa classe, ela será instanciada como Singleton, portanto não precisaríamos separar da classe Connection, mas
+	/// para manter o padrão, foi separada também.
 	/// </summary>
-	public class RabbitMQPublisher : IBrokerService
+	public class RabbitMQListener : IBrokerListener
 	{
-		private readonly ILogger<RabbitMQPublisher> _logger;
+		private readonly ILogger<RabbitMQListener> _logger;
 		private readonly RabbitMQConnection _connection;
 		private IChannel? _channel;
 
-		public RabbitMQPublisher(ILogger<RabbitMQPublisher> logger, RabbitMQConnection connection) 
+		public RabbitMQListener(ILogger<RabbitMQListener> logger, RabbitMQConnection connection)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
 		}
 
 		/// <summary>
-		/// Responsável por publicar uma mensagem/evento
+		/// Responsável por receber as mensagens que estão na fila configurada.
+		/// Para evitar de ter as regras de negócio dentro de um service, será passado um parâmetro do tipo Func (function/método)
+		/// Com esse parametro conseguimos ter a regra de negócio dentro da classe responsável e o service tem apenas a responsábilidade de rodá-la ao 
+		/// receber uma mensagem
 		/// </summary>
-		/// <param name="message"></param>
+		/// <param name="callback"></param>
 		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
-		public async Task SendMessageAsync(string message, CancellationToken cancellationToken = default)
+		public async Task ReceiveMessageAsync(Func<string, CancellationToken, Task> callback, CancellationToken cancellationToken = default)
 		{
 			await SetChannelAsync(cancellationToken);
 
-			byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-			
-			var props = new BasicProperties() 
+			var consumer = new AsyncEventingBasicConsumer(_channel!);
+
+			consumer.ReceivedAsync += async (ch, ea) =>
 			{
-				ContentType = "application/json"
+				string bodyJson = Encoding.UTF8.GetString(ea.Body.ToArray());
+
+				_logger.LogInformation("{DateTime} - Mensagem Recebida: {Message}", DateTime.UtcNow, bodyJson);
+
+				await callback(bodyJson, cancellationToken);
+
+				await _channel!.BasicAckAsync(ea.DeliveryTag, false);
 			};
 
-			await _channel!.BasicPublishAsync("exchange_example", "queue_example", true, basicProperties: props, body: messageBytes);
-
-			_logger.LogInformation("{DateTime} - Mensagem Enviada", DateTime.UtcNow);
+			string consumerTag = await _channel!.BasicConsumeAsync("queue_example", false, consumer);
 		}
 
 		/// <summary>

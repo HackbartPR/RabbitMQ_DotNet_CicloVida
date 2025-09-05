@@ -1,14 +1,11 @@
 ﻿using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
-namespace Microsservico.A.Services.RabbitMQ
+namespace Microsservico.B.Services.RabbitMQ
 {
 	/// <summary>
 	/// Classe responsável por realizar a conexão com o RabbitMQ
-	/// Não terá envolvimento com a abertura de canais ou envio/recebimento de mensagens
-	/// Essa classe deve ser injetada como Singleton, ou seja, será instanciada apenas uma vez. Isso se deve ao fato de que a conexão com RabbitMQ é pesada/custosa
-	/// por isso recomenda-se a não criar uma conexão a cada request.
-	/// Este motivo explicado acima, foi o que motivou termos essa classe separada da classe <seealso cref="RabbitMQPublisher"/>, pois essa última cria uma instância a cada request.
+	/// Não terá envolvimento com a abertura de canais ou envio/recebimento de mensagens	
 	/// </summary>
 	public class RabbitMQConnection : IDisposable
 	{

@@ -11,6 +11,6 @@
 		/// <param name="message"></param>
 		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
-		Task SendMessageAsync(string message, CancellationToken? cancellationToken = default);
+		Task SendMessageAsync(string message, CancellationToken cancellationToken = default);
 	}
 }

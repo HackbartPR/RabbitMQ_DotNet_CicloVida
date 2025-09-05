@@ -13,6 +13,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Microsservico.A/Microsservico.A.csproj", "Microsservico.A/"]
+COPY ["Contratos/Contratos.csproj", "Contratos/"]
 RUN dotnet restore "./Microsservico.A/Microsservico.A.csproj"
 COPY . .
 WORKDIR "/src/Microsservico.A"
